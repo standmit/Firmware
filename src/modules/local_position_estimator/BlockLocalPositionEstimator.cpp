@@ -267,6 +267,8 @@ void BlockLocalPositionEstimator::update()
         // reset lowpass filter as well
         _xLowPass.setState(_x);
         _aglLowPass.setState(0);
+
+        _fResetRequired = false;
     }
 
 	_lastArmedState = armedState;
