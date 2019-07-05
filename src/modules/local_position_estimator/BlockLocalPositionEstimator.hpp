@@ -393,6 +393,7 @@ private:
 	// status
 	bool _receivedGps;
 	bool _lastArmedState;
+    bool _fResetRequired;   // Trigger at first start now, can be used in future
 
 	// masks
 	uint16_t _sensorTimeout;
