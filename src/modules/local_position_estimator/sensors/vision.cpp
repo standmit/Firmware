@@ -72,6 +72,39 @@ void BlockLocalPositionEstimator::visionCorrect()
 
 	if (visionMeasure(y) != OK) { return; }
 
+    // Perform reset if required
+    if( _fResetRequired )
+    {
+        mavlink_and_console_log_info(&mavlink_log_pub,
+                                     "[lpe] Reseting LPE local position");
+
+        mavlink_and_console_log_info(&mavlink_log_pub,
+                                     "[lpe] vector y is (%f, %f, %f)",
+                                     double( y(X_x) ), double( y(X_y) ), double( y(X_z) ) );
+
+        // we just armed, we are at origin on the ground
+        _x(X_x) = y(X_x);
+        _x(X_y) = y(X_y);
+        _x(X_z) = y(X_z);
+        // reset Z or not? _x(X_z) = 0;
+
+        // we aren't moving, all velocities are zero
+        _x(X_vx) = 0;
+        _x(X_vy) = 0;
+        _x(X_vz) = 0;
+
+        // assume we are on the ground, so terrain alt is local alt
+        _x(X_tz) = _x(X_z);
+
+        // reset lowpass filter as well
+        _xLowPass.setState(_x);
+        _aglLowPass.setState(0);
+
+        _fResetRequired = false;
+
+        return;
+    }
+
 	// vision measurement matrix, measures position
 	Matrix<float, n_y_vision, n_x> C;
 	C.setZero();

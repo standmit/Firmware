@@ -113,6 +113,8 @@ private:
 	int		_mocap_sub = -1;
 	int		_magnetometer_sub = -1;
 
+    bool    _fResetRequired = true;
+
 	orb_advert_t	_att_pub = nullptr;
 
 	struct {
@@ -347,6 +349,19 @@ void AttitudeEstimatorQ::task_main()
 			vehicle_attitude_s vision;
 
 			if (orb_copy(ORB_ID(vehicle_vision_attitude), _vision_sub, &vision) == PX4_OK) {
+
+                //! Checking reset flag, if required - reseting
+                if( _fResetRequired )
+                {
+                    PX4_INFO("AttiudeEstimator: attitude reseted");
+                    _q = Quatf( vision.q );
+
+                    _rates.zero();
+                    _gyro_bias.zero();
+                    _fResetRequired = false;
+                    continue;
+                }
+
 				Quatf q(vision.q);
 
 				Dcmf Rvis = Quatf(vision.q);
@@ -442,6 +457,7 @@ void AttitudeEstimatorQ::task_main()
 
 			/* the instance count is not used here */
 			int att_inst;
+
 			orb_publish_auto(ORB_ID(vehicle_attitude), &_att_pub, &att, &att_inst, ORB_PRIO_HIGH);
 		}
 	}

@@ -223,8 +223,6 @@ void BlockLocalPositionEstimator::update()
 	// selection param, but is really not helping outdoors
 	// right now.
 
-    const vehicle_local_position_s &vision_pos = _sub_vision_pos.get();
-
     //! TODO: Uncomment block below for tesing later
 //	if (!_lastArmedState && armedState) {
 
@@ -245,31 +243,6 @@ void BlockLocalPositionEstimator::update()
 //	     _xLowPass.setState(_x);
 //	     _aglLowPass.setState(0);
 //	}
-
-    if( _fResetRequired )
-    {
-        mavlink_and_console_log_info(&mavlink_log_pub,
-                                     "%sreset counter was increased, reseting pos and zeroing velocities",
-                                     msg_label);
-        // we just armed, we are at origin on the ground
-        _x(X_x) = vision_pos.x;
-        _x(X_y) = vision_pos.y;
-        // reset Z or not? _x(X_z) = 0;
-
-        // we aren't moving, all velocities are zero
-        _x(X_vx) = 0;
-        _x(X_vy) = 0;
-        _x(X_vz) = 0;
-
-        // assume we are on the ground, so terrain alt is local alt
-        _x(X_tz) = _x(X_z);
-
-        // reset lowpass filter as well
-        _xLowPass.setState(_x);
-        _aglLowPass.setState(0);
-
-        _fResetRequired = false;
-    }
 
 	_lastArmedState = armedState;
 
