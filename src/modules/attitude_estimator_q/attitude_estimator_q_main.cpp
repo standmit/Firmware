@@ -59,6 +59,8 @@
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/vehicle_magnetometer.h>
 
+#include <uORB/topics/restart_vision_position.h>
+
 extern "C" __EXPORT int attitude_estimator_q_main(int argc, char *argv[]);
 
 using matrix::Dcmf;
@@ -112,6 +114,7 @@ private:
 	int		_vision_sub = -1;
 	int		_mocap_sub = -1;
 	int		_magnetometer_sub = -1;
+	int		_restart_vision_position_sub = -1;  /**< Used for receiving restart signal (sended from commander ACRO mode) */
 
     bool    _fResetRequired = true;
 
@@ -269,6 +272,7 @@ void AttitudeEstimatorQ::task_main()
 	_params_sub = orb_subscribe(ORB_ID(parameter_update));
 	_global_pos_sub = orb_subscribe(ORB_ID(vehicle_global_position));
 	_magnetometer_sub = orb_subscribe(ORB_ID(vehicle_magnetometer));
+	_restart_vision_position_sub = orb_subscribe(ORB_ID(restart_vision_position));
 
 	update_parameters(true);
 
@@ -340,6 +344,21 @@ void AttitudeEstimatorQ::task_main()
 			}
 
 		}
+
+        //! NTRLAB
+        // Checking is restart required
+        bool restart_vision_position_updated = false;
+        orb_check(_restart_vision_position_sub, &restart_vision_position_updated);
+        if( restart_vision_position_updated )
+        {
+            restart_vision_position_s restart_vision_pos;
+            if (orb_copy(ORB_ID(restart_vision_position),
+                         _restart_vision_position_sub,
+                         &restart_vision_pos) == PX4_OK)
+            {
+                _fResetRequired = true;
+            }
+        }
 
 		// Update vision and motion capture heading
 		bool vision_updated = false;

@@ -87,6 +87,7 @@ set(msg_files
 	rate_ctrl_status.msg
 	rc_channels.msg
 	rc_parameter_map.msg
+        restart_vision_position.msg
 	safety.msg
 	satellite_info.msg
 	sensor_accel.msg

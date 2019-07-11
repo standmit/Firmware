@@ -137,6 +137,7 @@ static constexpr uint64_t INAIR_RESTART_HOLDOFF_INTERVAL = 500_ms;
 /* Mavlink log uORB handle */
 static orb_advert_t mavlink_log_pub = nullptr;
 static orb_advert_t power_button_state_pub = nullptr;
+static orb_advert_t restart_vision_position_pub = nullptr;
 
 /* flags */
 static volatile bool thread_should_exit = false;	/**< daemon exit flag */
@@ -460,6 +461,7 @@ int commander_main(int argc, char *argv[])
 	}
 
 	if (!strcmp(argv[1], "mode")) {
+        printf("Mode changed\n");
 		if (argc > 2) {
 			uint8_t new_main_state = commander_state_s::MAIN_STATE_MAX;
 			if (!strcmp(argv[2], "manual")) {
@@ -475,7 +477,19 @@ int commander_main(int argc, char *argv[])
 			} else if (!strcmp(argv[2], "auto:rtl")) {
 				new_main_state = commander_state_s::MAIN_STATE_AUTO_RTL;
 			} else if (!strcmp(argv[2], "acro")) {
-				new_main_state = commander_state_s::MAIN_STATE_ACRO;
+                //! NTRLAB
+                //! Reserving that mode for reseting vision_position
+                restart_vision_position_s restart_vision_pos;
+                if( restart_vision_position_pub )
+                {
+                    orb_publish(ORB_ID(restart_vision_position), restart_vision_position_pub, &restart_vision_pos);
+                }
+                else
+                {
+                    restart_vision_position_pub = orb_advertise(ORB_ID(restart_vision_position), &restart_vision_pos);
+                }
+//				new_main_state = commander_state_s::MAIN_STATE_ACRO;
+
 			} else if (!strcmp(argv[2], "offboard")) {
 				new_main_state = commander_state_s::MAIN_STATE_OFFBOARD;
 			} else if (!strcmp(argv[2], "stabilized")) {
@@ -714,7 +728,21 @@ Commander::handle_command(vehicle_status_s *status_local, const vehicle_command_
 
 				} else if (custom_main_mode == PX4_CUSTOM_MAIN_MODE_ACRO) {
 					/* ACRO */
-					main_ret = main_state_transition(*status_local, commander_state_s::MAIN_STATE_ACRO, status_flags, &internal_state);
+//					main_ret = main_state_transition(status_local, commander_state_s::MAIN_STATE_ACRO, main_state_prev, &status_flags, &internal_state);
+					//! NTRLAB
+					//! Reserving that mode for reseting vision_position
+					restart_vision_position_s restart_vision_pos;
+					if( restart_vision_position_pub )
+					{
+						orb_publish(ORB_ID(restart_vision_position), restart_vision_position_pub, &restart_vision_pos);
+					}
+					else
+					{
+						restart_vision_position_pub = orb_advertise(ORB_ID(restart_vision_position), &restart_vision_pos);
+					}
+					PX4_INFO("Vision position restart initiated (from API)");
+
+//                    main_ret = TRANSITION_DENIED;
 
 				} else if (custom_main_mode == PX4_CUSTOM_MAIN_MODE_RATTITUDE) {
 					/* RATTITUDE */

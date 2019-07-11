@@ -61,6 +61,14 @@
 #include <uORB/topics/vehicle_local_position.h>
 
 using math::constrain;
+
+//NTR-lab
+// publications
+#include <uORB/topics/restart_vision_position.h>
+
+using control::BlockParamFloat;
+using control::BlockParamInt;
+
 using uORB::Publication;
 using uORB::Subscription;
 
