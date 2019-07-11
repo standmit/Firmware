@@ -30,6 +30,7 @@
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/estimator_status.h>
 #include <uORB/topics/ekf2_innovations.h>
+#include <uORB/topics/restart_vision_position.h>
 
 using namespace matrix;
 using namespace control;
@@ -260,6 +261,7 @@ private:
 	uORB::Subscription<distance_sensor_s> *_sub_lidar;
 	uORB::Subscription<distance_sensor_s> *_sub_sonar;
 	uORB::Subscription<landing_target_pose_s> _sub_landing_target_pose;
+    uORB::Subscription<restart_vision_position_s> _sub_restart_vision_position;
 
 	// publications
 	uORB::Publication<vehicle_local_position_s> _pub_lpos;

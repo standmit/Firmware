@@ -55,6 +55,10 @@
 #include <uORB/topics/vehicle_global_position.h>
 #include <uORB/topics/vehicle_local_position.h>
 
+//NTR-lab
+// publications
+#include <uORB/topics/restart_vision_position.h>
+
 using control::BlockParamFloat;
 using control::BlockParamInt;
 using uORB::Publication;

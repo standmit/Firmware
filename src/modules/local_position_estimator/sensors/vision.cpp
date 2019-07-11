@@ -78,10 +78,6 @@ void BlockLocalPositionEstimator::visionCorrect()
         mavlink_and_console_log_info(&mavlink_log_pub,
                                      "[lpe] Reseting LPE local position");
 
-        mavlink_and_console_log_info(&mavlink_log_pub,
-                                     "[lpe] vector y is (%f, %f, %f)",
-                                     double( y(X_x) ), double( y(X_y) ), double( y(X_z) ) );
-
         // we just armed, we are at origin on the ground
         _x(X_x) = y(X_x);
         _x(X_y) = y(X_y);
@@ -94,7 +90,7 @@ void BlockLocalPositionEstimator::visionCorrect()
         _x(X_vz) = 0;
 
         // assume we are on the ground, so terrain alt is local alt
-        _x(X_tz) = _x(X_z);
+        _x(X_tz) = _x(X_z);     //! Reset can be failed in air in cause of this row
 
         // reset lowpass filter as well
         _xLowPass.setState(_x);
